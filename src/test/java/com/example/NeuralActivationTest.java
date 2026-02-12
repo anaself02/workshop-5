@@ -1,38 +1,28 @@
 package com.example;
 
-import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
+import java.util.stream.Stream;
 
-public class NeuralActivationTest {
+class NeuralActivationTest {
 
-    NeuralActivation activation = new NeuralActivation();
+    private final NeuralActivation activator = new NeuralActivation();
 
-    @Test
-    void testNaNInput() {
-        assertEquals(0.0, activation.process(Double.NaN, 0.01, 10));
+    static Stream<Arguments> provideTestData() {
+        return Stream.of(
+            Arguments.of(Double.NaN, 0.01, 10.0, 0.0),
+            Arguments.of(-2000.0, 0.01, 10.0, -10.0),
+            Arguments.of(-1.0, 0.01, 10.0, -0.01),
+            Arguments.of(15.0, 0.01, 10.0, 10.0),
+            Arguments.of(5.0, 0.01, 10.0, 5.0)
+        );
     }
 
-    @Test
-    void testNegativeNoClipping() {
-        double result = activation.process(-5, 0.1, 10);
-        assertEquals(-0.5, result);
-    }
-
-    @Test
-    void testNegativeWithClipping() {
-        double result = activation.process(-200, 0.1, 10);
-        assertEquals(-10, result);
-    }
-
-    @Test
-    void testPositiveWithClipping() {
-        double result = activation.process(20, 0.1, 10);
-        assertEquals(10, result);
-    }
-
-    @Test
-    void testPositiveNoClipping() {
-        double result = activation.process(5, 0.1, 10);
-        assertEquals(5, result);
+    @ParameterizedTest
+    @MethodSource("provideTestData")
+    void testProcess(double x, double alpha, double limit, double expected) {
+        assertEquals(expected, activator.process(x, alpha, limit), 0.0001);
     }
 }
